@@ -5,7 +5,7 @@
 [![Docker Hub](https://img.shields.io/badge/docker-latest-blue.svg)](https://hub.docker.com/r/grepplabs/kafka-proxy)
 [![Docker Pulls](https://img.shields.io/docker/pulls/grepplabs/kafka-proxy)](https://hub.docker.com/r/grepplabs/kafka-proxy)
 
-The Kafka Proxy is based on idea of [Cloud SQL Proxy](https://github.com/GoogleCloudPlatform/cloudsql-proxy). 
+The Kafka Proxy is based on idea of [Cloud SQL Proxy](https://github.com/GoogleCloudPlatform/cloudsql-proxy).
 It allows a service to connect to Kafka brokers without having to deal with SASL/PLAIN authentication and SSL certificates.  
 
 It works by opening tcp sockets on the local machine and proxying connections to the associated Kafka brokers
@@ -150,9 +150,9 @@ See:
 	        --proxy-listener-tls-required-client-subject-organizational-unit stringArray  Required client certificate subject organizational unit
 
 ### Usage example
-	
+
 	kafka-proxy server --bootstrap-server-mapping "192.168.99.100:32400,0.0.0.0:32399"
-	
+
 	kafka-proxy server --bootstrap-server-mapping "192.168.99.100:32400,127.0.0.1:32400" \
 	                   --bootstrap-server-mapping "192.168.99.100:32401,127.0.0.1:32401" \
 	                   --bootstrap-server-mapping "192.168.99.100:32402,127.0.0.1:32402" \
@@ -167,7 +167,7 @@ See:
 	                   --external-server-mapping "192.168.99.100:32401,127.0.0.1:32402" \
 	                   --external-server-mapping "192.168.99.100:32402,127.0.0.1:32403" \
 	                   --forbidden-api-keys 20
-    
+
 
     export BOOTSTRAP_SERVER_MAPPING="192.168.99.100:32401,0.0.0.0:32402 192.168.99.100:32402,0.0.0.0:32403" && kafka-proxy server
 
@@ -224,11 +224,11 @@ SASL authentication is performed by the proxy. SASL authentication is enabled on
                              --auth-local-param "--claim-sub=alice" \
                              --auth-local-param "--claim-sub=bob" \
                              --bootstrap-server-mapping "192.168.99.100:32400,127.0.0.1:32400"
-                             
+
 ### Same client certificate check enabled example
 
-Validate that client certificate used by proxy client is exactly the same as client certificate in authentication initiated by proxy 
-                       
+Validate that client certificate used by proxy client is exactly the same as client certificate in authentication initiated by proxy
+
     kafka-proxy server --bootstrap-server-mapping "kafka-0.grepplabs.com:9093,0.0.0.0:32399" \
        --tls-enable \
        --tls-client-cert-file client.crt \
@@ -619,7 +619,7 @@ kafka-proxy server --log-level debug \
 
 Use localhost:19092 as bootstrap servers
 
-### Embedded third-party source code 
+### Embedded third-party source code
 
 * [Cloud SQL Proxy](https://github.com/GoogleCloudPlatform/cloudsql-proxy)
 * [Sarama](https://github.com/Shopify/sarama)
