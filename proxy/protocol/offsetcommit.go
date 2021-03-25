@@ -22,6 +22,8 @@ func (f *OffsetCommitRequestFactory) Produce(requestKeyVersion *RequestKeyVersio
 		return &OffsetCommitRequestV6{}, nil
 	case 7:
 		return &OffsetCommitRequestV7{}, nil
+	case 8:
+		return &OffsetCommitRequestV8{}, nil
 	default:
 		return nil, fmt.Errorf("Not supported listoffsets request %d", requestKeyVersion.ApiVersion)
 	}
@@ -738,5 +740,122 @@ func (r *OffsetCommitRequestV7) GetTopics() []string {
 }
 
 func (r *OffsetCommitRequestV7) GetConsumerGroups() []string {
+	return r.ConsumerGroups
+}
+
+type OffsetCommitRequestV8 struct {
+	Topics         []string
+	ConsumerGroups []string
+}
+
+func (r *OffsetCommitRequestV8) encode(pe packetEncoder) error {
+	return nil
+}
+
+func (r *OffsetCommitRequestV8) key() int16 {
+	return 8
+}
+
+func (r *OffsetCommitRequestV8) version() int16 {
+	return 8
+}
+
+func (r *OffsetCommitRequestV8) decode(pd packetDecoder) (err error) {
+	// group_id
+	groupId, err := pd.getCompactString()
+	if err != nil {
+		return err
+	}
+
+	r.ConsumerGroups = append(r.ConsumerGroups, groupId)
+	// generation_id
+	_, err = pd.getInt32()
+	if err != nil {
+		return err
+	}
+	// member_id
+	_, err = pd.getCompactString()
+	if err != nil {
+		return err
+	}
+	// group_instance_id
+	_, err = pd.getCompactNullableString()
+	if err != nil {
+		return err
+	}
+
+	// get length of topic array
+	numTopics, err := pd.getInt32()
+	if err != nil {
+		return err
+	}
+
+	for i := int32(1); i <= numTopics; i++ {
+		topicName, err := pd.getCompactString()
+		if err != nil {
+			return err
+		}
+
+		r.Topics = append(r.Topics, topicName)
+
+		// get length of partition array
+		numPart, err := pd.getInt32()
+		if err != nil {
+			return err
+		}
+
+		for j := int32(1); j <= numPart; j++ {
+			// partition_index
+			_, err = pd.getInt32()
+			if err != nil {
+				return err
+			}
+			// committed_offset
+			_, err := pd.getInt64()
+			if err != nil {
+				return err
+			}
+			// committed_leader_epoch
+			_, err = pd.getInt32()
+			if err != nil {
+				return err
+			}
+			// committed_metadata
+			_, err = pd.getCompactNullableString()
+			if err != nil {
+				return err
+			}
+
+			partTf := TaggedFields{}
+			err = partTf.decode(pd)
+
+			if err != nil {
+				return err
+			}
+		}
+
+		topicTf := TaggedFields{}
+		err = topicTf.decode(pd)
+
+		if err != nil {
+			return err
+		}
+	}
+
+	reqTf := TaggedFields{}
+	err = reqTf.decode(pd)
+
+	if err != nil {
+		return err
+	}
+
+	return err
+}
+
+func (r *OffsetCommitRequestV8) GetTopics() []string {
+	return r.Topics
+}
+
+func (r *OffsetCommitRequestV8) GetConsumerGroups() []string {
 	return r.ConsumerGroups
 }

@@ -16,6 +16,10 @@ func (f *CreateTopicsRequestFactory) Produce(requestKeyVersion *RequestKeyVersio
 		return &CreateTopicsRequestV3{}, nil
 	case 4:
 		return &CreateTopicsRequestV4{}, nil
+	case 5:
+		return &CreateTopicsRequestV5{}, nil
+	case 6:
+		return &CreateTopicsRequestV6{}, nil
 	default:
 		return nil, fmt.Errorf("Not supported create topics request %d", requestKeyVersion.ApiVersion)
 	}
@@ -567,5 +571,283 @@ func (r *CreateTopicsRequestV4) decode(pd packetDecoder) (err error) {
 }
 
 func (r *CreateTopicsRequestV4) GetTopics() []string {
+	return r.Topics
+}
+
+type CreateTopicsRequestV5 struct {
+	Topics []string
+}
+
+func (r *CreateTopicsRequestV5) encode(pe packetEncoder) error {
+	return nil
+}
+
+func (r *CreateTopicsRequestV5) key() int16 {
+	return 19
+}
+
+func (r *CreateTopicsRequestV5) version() int16 {
+	return 5
+}
+
+func (r *CreateTopicsRequestV5) decode(pd packetDecoder) (err error) {
+	// get length of topic array
+	numTopics, err := pd.getInt32()
+	if err != nil {
+		return err
+	}
+
+	for i := int32(1); i <= numTopics; i++ {
+		topicName, err := pd.getCompactString()
+		if err != nil {
+			return err
+		}
+
+		r.Topics = append(r.Topics, topicName)
+
+		// num_partitions
+		_, err = pd.getInt32()
+		if err != nil {
+			return err
+		}
+
+		// replication_factor
+		_, err = pd.getInt16()
+		if err != nil {
+			return err
+		}
+
+		// get length of assignments array
+		numAssignments, err := pd.getInt32()
+		if err != nil {
+			return err
+		}
+
+		for j := int32(1); j <= numAssignments; j++ {
+			// partition_index
+			_, err = pd.getInt32()
+			if err != nil {
+				return err
+			}
+
+			// get length of broker ids array
+			numBrokers, err := pd.getInt32()
+			if err != nil {
+				return err
+			}
+
+			for j := int32(1); j <= numBrokers; j++ {
+				// broker_ids
+				_, err = pd.getInt32()
+				if err != nil {
+					return err
+				}
+			}
+
+			assignTf := TaggedFields{}
+			err = assignTf.decode(pd)
+
+			if err != nil {
+				return err
+			}
+		}
+
+		// get length of configs array
+		numConfigs, err := pd.getInt32()
+		if err != nil {
+			return err
+		}
+
+		for j := int32(1); j <= numConfigs; j++ {
+			// name
+			_, err = pd.getCompactString()
+			if err != nil {
+				return err
+			}
+
+			// value
+			_, err = pd.getCompactNullableString()
+			if err != nil {
+				return err
+			}
+
+			configTf := TaggedFields{}
+			err = configTf.decode(pd)
+
+			if err != nil {
+				return err
+			}
+		}
+
+		topicTf := TaggedFields{}
+		err = topicTf.decode(pd)
+
+		if err != nil {
+			return err
+		}
+	}
+
+	// timeout_ms
+	_, err = pd.getInt32()
+	if err != nil {
+		return err
+	}
+
+	// validate_only
+	_, err = pd.getBool()
+	if err != nil {
+		return err
+	}
+
+	reqTf := TaggedFields{}
+	err = reqTf.decode(pd)
+
+	if err != nil {
+		return err
+	}
+
+	return err
+}
+
+func (r *CreateTopicsRequestV5) GetTopics() []string {
+	return r.Topics
+}
+
+type CreateTopicsRequestV6 struct {
+	Topics []string
+}
+
+func (r *CreateTopicsRequestV6) encode(pe packetEncoder) error {
+	return nil
+}
+
+func (r *CreateTopicsRequestV6) key() int16 {
+	return 19
+}
+
+func (r *CreateTopicsRequestV6) version() int16 {
+	return 6
+}
+
+func (r *CreateTopicsRequestV6) decode(pd packetDecoder) (err error) {
+	// get length of topic array
+	numTopics, err := pd.getInt32()
+	if err != nil {
+		return err
+	}
+
+	for i := int32(1); i <= numTopics; i++ {
+		topicName, err := pd.getCompactString()
+		if err != nil {
+			return err
+		}
+
+		r.Topics = append(r.Topics, topicName)
+
+		// num_partitions
+		_, err = pd.getInt32()
+		if err != nil {
+			return err
+		}
+
+		// replication_factor
+		_, err = pd.getInt16()
+		if err != nil {
+			return err
+		}
+
+		// get length of assignments array
+		numAssignments, err := pd.getInt32()
+		if err != nil {
+			return err
+		}
+
+		for j := int32(1); j <= numAssignments; j++ {
+			// partition_index
+			_, err = pd.getInt32()
+			if err != nil {
+				return err
+			}
+
+			// get length of broker ids array
+			numBrokers, err := pd.getInt32()
+			if err != nil {
+				return err
+			}
+
+			for j := int32(1); j <= numBrokers; j++ {
+				// broker_ids
+				_, err = pd.getInt32()
+				if err != nil {
+					return err
+				}
+			}
+
+			assignTf := TaggedFields{}
+			err = assignTf.decode(pd)
+
+			if err != nil {
+				return err
+			}
+		}
+
+		// get length of configs array
+		numConfigs, err := pd.getInt32()
+		if err != nil {
+			return err
+		}
+
+		for j := int32(1); j <= numConfigs; j++ {
+			// name
+			_, err = pd.getCompactString()
+			if err != nil {
+				return err
+			}
+
+			// value
+			_, err = pd.getCompactNullableString()
+			if err != nil {
+				return err
+			}
+
+			configTf := TaggedFields{}
+			err = configTf.decode(pd)
+
+			if err != nil {
+				return err
+			}
+		}
+
+		topicTf := TaggedFields{}
+		err = topicTf.decode(pd)
+
+		if err != nil {
+			return err
+		}
+	}
+
+	// timeout_ms
+	_, err = pd.getInt32()
+	if err != nil {
+		return err
+	}
+
+	// validate_only
+	_, err = pd.getBool()
+	if err != nil {
+		return err
+	}
+
+	reqTf := TaggedFields{}
+	err = reqTf.decode(pd)
+
+	if err != nil {
+		return err
+	}
+
+	return err
+}
+
+func (r *CreateTopicsRequestV6) GetTopics() []string {
 	return r.Topics
 }

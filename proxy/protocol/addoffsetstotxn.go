@@ -10,6 +10,8 @@ func (f *AddOffsetsToTxnRequestFactory) Produce(requestKeyVersion *RequestKeyVer
 		return &AddOffsetsToTxnV0{}, nil
 	case 1:
 		return &AddOffsetsToTxnV1{}, nil
+	case 2:
+		return &AddOffsetsToTxnV2{}, nil
 	default:
 		return nil, fmt.Errorf("Not supported fetch request %d", requestKeyVersion.ApiVersion)
 	}
@@ -108,5 +110,53 @@ func (r *AddOffsetsToTxnV1) decode(pd packetDecoder) (err error) {
 }
 
 func (r *AddOffsetsToTxnV1) GetConsumerGroups() []string {
+	return r.ConsumerGroups
+}
+
+type AddOffsetsToTxnV2 struct {
+	ConsumerGroups []string
+}
+
+func (r *AddOffsetsToTxnV2) encode(pe packetEncoder) error {
+	return nil
+}
+
+func (r *AddOffsetsToTxnV2) key() int16 {
+	return 25
+}
+
+func (r *AddOffsetsToTxnV2) version() int16 {
+	return 2
+}
+
+func (r *AddOffsetsToTxnV2) decode(pd packetDecoder) (err error) {
+	// transactional_id
+	_, err = pd.getString()
+	if err != nil {
+		return err
+	}
+	// producer_id
+	_, err = pd.getInt64()
+	if err != nil {
+		return err
+	}
+	// producer_epoch
+	_, err = pd.getInt16()
+	if err != nil {
+		return err
+	}
+
+	// group_id
+	groupId, err := pd.getString()
+	if err != nil {
+		return err
+	}
+
+	r.ConsumerGroups = append(r.ConsumerGroups, groupId)
+
+	return err
+}
+
+func (r *AddOffsetsToTxnV2) GetConsumerGroups() []string {
 	return r.ConsumerGroups
 }

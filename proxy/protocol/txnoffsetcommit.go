@@ -10,6 +10,10 @@ func (f *TxnOffsetCommitRequestFactory) Produce(requestKeyVersion *RequestKeyVer
 		return &TxnOffsetCommitV0{}, nil
 	case 1:
 		return &TxnOffsetCommitV1{}, nil
+	case 2:
+		return &TxnOffsetCommitV2{}, nil
+	case 3:
+		return &TxnOffsetCommitV3{}, nil
 	default:
 		return nil, fmt.Errorf("Not supported fetch request %d", requestKeyVersion.ApiVersion)
 	}
@@ -313,17 +317,17 @@ func (r *TxnOffsetCommitV3) key() int16 {
 }
 
 func (r *TxnOffsetCommitV3) version() int16 {
-	return 2
+	return 3
 }
 
 func (r *TxnOffsetCommitV3) decode(pd packetDecoder) (err error) {
 	// transactional_id
-	_, err = pd.getString()
+	_, err = pd.getCompactString()
 	if err != nil {
 		return err
 	}
 	// group_id
-	groupId, err := pd.getString()
+	groupId, err := pd.getCompactString()
 	if err != nil {
 		return err
 	}
@@ -404,7 +408,28 @@ func (r *TxnOffsetCommitV3) decode(pd packetDecoder) (err error) {
 			if err != nil {
 				return err
 			}
+
+			partTf := TaggedFields{}
+			err = partTf.decode(pd)
+
+			if err != nil {
+				return err
+			}
 		}
+
+		topicTf := TaggedFields{}
+		err = topicTf.decode(pd)
+
+		if err != nil {
+			return err
+		}
+	}
+
+	reqTf := TaggedFields{}
+	err = reqTf.decode(pd)
+
+	if err != nil {
+		return err
 	}
 
 	return err

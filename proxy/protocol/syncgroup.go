@@ -341,6 +341,20 @@ func (r *SyncGroupRequestV4) decode(pd packetDecoder) (err error) {
 		if err != nil {
 			return err
 		}
+
+		assignTf := TaggedFields{}
+		err = assignTf.decode(pd)
+
+		if err != nil {
+			return err
+		}
+	}
+
+	reqTf := TaggedFields{}
+	err = reqTf.decode(pd)
+
+	if err != nil {
+		return err
 	}
 
 	return err
@@ -422,6 +436,20 @@ func (r *SyncGroupRequestV5) decode(pd packetDecoder) (err error) {
 		if err != nil {
 			return err
 		}
+
+		assignTf := TaggedFields{}
+		err = assignTf.decode(pd)
+
+		if err != nil {
+			return err
+		}
+	}
+
+	reqTf := TaggedFields{}
+	err = reqTf.decode(pd)
+
+	if err != nil {
+		return err
 	}
 
 	return err

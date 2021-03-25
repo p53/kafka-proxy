@@ -230,6 +230,20 @@ func (r *LeaveGroupRequestV4) decode(pd packetDecoder) (err error) {
 		if err != nil {
 			return err
 		}
+
+		memberTf := TaggedFields{}
+		err = memberTf.decode(pd)
+
+		if err != nil {
+			return err
+		}
+	}
+
+	reqTf := TaggedFields{}
+	err = reqTf.decode(pd)
+
+	if err != nil {
+		return err
 	}
 
 	return err

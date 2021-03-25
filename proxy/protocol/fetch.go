@@ -30,6 +30,8 @@ func (f *FetchRequestFactory) Produce(requestKeyVersion *RequestKeyVersion) (req
 		return &FetchRequestV10{}, nil
 	case 11:
 		return &FetchRequestV11{}, nil
+	case 12:
+		return &FetchRequestV12{}, nil
 	default:
 		return nil, fmt.Errorf("Not supported fetch request %d", requestKeyVersion.ApiVersion)
 	}
@@ -1295,5 +1297,175 @@ func (r *FetchRequestV11) decode(pd packetDecoder) (err error) {
 }
 
 func (r *FetchRequestV11) GetTopics() []string {
+	return r.Topics
+}
+
+type FetchRequestV12 struct {
+	Topics []string
+}
+
+func (r *FetchRequestV12) encode(pe packetEncoder) error {
+	return nil
+}
+
+func (r *FetchRequestV12) key() int16 {
+	return 1
+}
+
+func (r *FetchRequestV12) version() int16 {
+	return 12
+}
+
+func (r *FetchRequestV12) decode(pd packetDecoder) (err error) {
+	// reaplicaId
+	_, err = pd.getInt32()
+	if err != nil {
+		return err
+	}
+	// maxWaitTime
+	_, err = pd.getInt32()
+	if err != nil {
+		return err
+	}
+	// minBytes
+	_, err = pd.getInt32()
+	if err != nil {
+		return err
+	}
+	// maxBytes
+	_, err = pd.getInt32()
+	if err != nil {
+		return err
+	}
+	// isolation level
+	_, err = pd.getInt8()
+	if err != nil {
+		return err
+	}
+	// session_id
+	_, err = pd.getInt32()
+	if err != nil {
+		return err
+	}
+	// session_epoch
+	_, err = pd.getInt32()
+	if err != nil {
+		return err
+	}
+	// get length of topic array
+	numTopics, err := pd.getInt32()
+	if err != nil {
+		return err
+	}
+
+	for i := int32(1); i <= numTopics; i++ {
+		topicName, err := pd.getCompactString()
+		if err != nil {
+			return err
+		}
+
+		r.Topics = append(r.Topics, topicName)
+
+		// get length of partition array
+		numPart, err := pd.getInt32()
+		if err != nil {
+			return err
+		}
+
+		for j := int32(1); j <= numPart; j++ {
+			// partition
+			_, err = pd.getInt32()
+			if err != nil {
+				return err
+			}
+			// current_leader_epoch
+			_, err = pd.getInt32()
+			if err != nil {
+				return err
+			}
+			// fetch_offset
+			_, err = pd.getInt64()
+			if err != nil {
+				return err
+			}
+			// log_start_offset
+			_, err = pd.getInt64()
+			if err != nil {
+				return err
+			}
+			// partition_max_bytes
+			_, err = pd.getInt32()
+			if err != nil {
+				return err
+			}
+
+			partTf := TaggedFields{}
+			err = partTf.decode(pd)
+
+			if err != nil {
+				return err
+			}
+		}
+
+		topicTf := TaggedFields{}
+		err = topicTf.decode(pd)
+
+		if err != nil {
+			return err
+		}
+	}
+
+	// get length of topic array
+	forgotNumTopics, err := pd.getInt32()
+	if err != nil {
+		return err
+	}
+
+	for i := int32(1); i <= forgotNumTopics; i++ {
+		// forgotten topic name
+		_, err := pd.getCompactString()
+		if err != nil {
+			return err
+		}
+
+		// get length of forgot partition array
+		forgotNumPart, err := pd.getInt32()
+		if err != nil {
+			return err
+		}
+
+		for i := int32(1); i <= forgotNumPart; i++ {
+			// partition
+			_, err = pd.getInt32()
+			if err != nil {
+				return err
+			}
+		}
+
+		forgotTopicTf := TaggedFields{}
+		err = forgotTopicTf.decode(pd)
+
+		if err != nil {
+			return err
+		}
+	}
+
+	// rack_id
+	_, err = pd.getCompactString()
+	if err != nil {
+		return err
+	}
+
+	reqTf := TaggedFields{}
+	err = reqTf.decode(pd)
+
+	if err != nil {
+		return err
+	}
+
+	return err
+}
+
+func (r *FetchRequestV12) GetTopics() []string {
 	return r.Topics
 }

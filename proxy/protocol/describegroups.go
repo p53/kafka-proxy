@@ -16,6 +16,8 @@ func (f *DescribeGroupsRequestFactory) Produce(requestKeyVersion *RequestKeyVers
 		return &DescribeGroupsRequestV3{}, nil
 	case 4:
 		return &DescribeGroupsRequestV4{}, nil
+	case 5:
+		return &DescribeGroupsRequestV5{}, nil
 	default:
 		return nil, fmt.Errorf("Not supported listoffsets request %d", requestKeyVersion.ApiVersion)
 	}
@@ -220,6 +222,13 @@ func (r *DescribeGroupsRequestV5) decode(pd packetDecoder) (err error) {
 
 	// include_authorized_operations
 	_, err = pd.getBool()
+	if err != nil {
+		return err
+	}
+
+	reqTf := TaggedFields{}
+	err = reqTf.decode(pd)
+
 	if err != nil {
 		return err
 	}

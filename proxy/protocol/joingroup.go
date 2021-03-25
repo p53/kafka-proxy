@@ -549,6 +549,20 @@ func (r *JoinGroupRequestV6) decode(pd packetDecoder) (err error) {
 		if err != nil {
 			return err
 		}
+
+		protoTf := TaggedFields{}
+		err = protoTf.decode(pd)
+
+		if err != nil {
+			return err
+		}
+	}
+
+	reqTf := TaggedFields{}
+	err = reqTf.decode(pd)
+
+	if err != nil {
+		return err
 	}
 
 	return err
@@ -630,6 +644,20 @@ func (r *JoinGroupRequestV7) decode(pd packetDecoder) (err error) {
 		if err != nil {
 			return err
 		}
+
+		protoTf := TaggedFields{}
+		err = protoTf.decode(pd)
+
+		if err != nil {
+			return err
+		}
+	}
+
+	reqTf := TaggedFields{}
+	err = reqTf.decode(pd)
+
+	if err != nil {
+		return err
 	}
 
 	return err

@@ -24,6 +24,8 @@ func (f *TopicMetadataRequestFactory) Produce(requestKeyVersion *RequestKeyVersi
 		return &TopicMetadataRequestV7{}, nil
 	case 8:
 		return &TopicMetadataRequestV8{}, nil
+	case 9:
+		return &TopicMetadataRequestV9{}, nil
 	default:
 		return nil, fmt.Errorf("Not supported topic metadata request %d", requestKeyVersion.ApiVersion)
 	}
@@ -322,5 +324,57 @@ func (r *TopicMetadataRequestV8) decode(pd packetDecoder) (err error) {
 }
 
 func (r *TopicMetadataRequestV8) GetTopics() []string {
+	return r.Topics
+}
+
+type TopicMetadataRequestV9 struct {
+	Topics []string
+}
+
+func (r *TopicMetadataRequestV9) encode(pe packetEncoder) error {
+	return nil
+}
+
+func (r *TopicMetadataRequestV9) key() int16 {
+	return 3
+}
+
+func (r *TopicMetadataRequestV9) version() int16 {
+	return 8
+}
+
+func (r *TopicMetadataRequestV9) decode(pd packetDecoder) (err error) {
+	r.Topics, err = pd.getStringArray()
+	if err != nil {
+		return err
+	}
+
+	tf := TaggedFields{}
+	err = tf.decode(pd)
+
+	if err != nil {
+		return err
+	}
+
+	// allow_auto_topic_creation
+	_, err = pd.getBool()
+	if err != nil {
+		return err
+	}
+	// include_cluster_authorized_operations
+	_, err = pd.getBool()
+	if err != nil {
+		return err
+	}
+	// include_topic_authorized_operations
+	_, err = pd.getBool()
+	if err != nil {
+		return err
+	}
+
+	return err
+}
+
+func (r *TopicMetadataRequestV9) GetTopics() []string {
 	return r.Topics
 }
